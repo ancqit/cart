@@ -9,10 +9,34 @@
   @if (current.token) {
     <p class="token-line">Token · {{ current.token }}</p>
   }
-  <p class="lede">{{ describeSchedule(current.schedule) }}</p>
 
-  <form (submit)="saveSchedule($event)">
-    <span class="field-label">Schedule</span>
+  <h2>Addresses</h2>
+  @for (stop of current.stops; track stop.id) {
+    <article class="stop-card">
+      <p class="place">{{ stop.address }}</p>
+      <p>{{ describeSchedule(stop.schedule) }}</p>
+      @if (stop.schedule.note) {
+        <p>{{ stop.schedule.note }}</p>
+      }
+      @if (current.stops.length > 1) {
+        <button class="quiet" type="button" (click)="removeStop(stop.id)" [disabled]="busy()">
+          Remove this address
+        </button>
+      }
+    </article>
+  }
+
+  <form (submit)="addStop($event)">
+    <span class="field-label">Another address</span>
+    <label class="field-label" for="stop-address">Address</label>
+    <textarea
+      id="stop-address"
+      rows="2"
+      maxlength="160"
+      [value]="address()"
+      (input)="onAddress($event)"
+      placeholder="Where this round arrives"
+    ></textarea>
     <div class="days">
       @for (day of days; track day) {
         <button type="button" [class.on]="chosenDays().includes(day)" (click)="toggleDay(day)">
@@ -30,17 +54,23 @@
     </div>
     <label class="field-label" for="edit-note">Note</label>
     <input id="edit-note" type="text" maxlength="80" [value]="note()" (input)="onNote($event)" />
-    <button class="solid" type="submit" [disabled]="busy()">Save schedule</button>
+    <button class="solid" type="submit" [disabled]="busy()">Add this address</button>
   </form>
 
-  <form (submit)="addVeggie($event)">
-    <h2>Vegetable</h2>
-    <label class="field-label" for="veggie-name">Name</label>
-    <input id="veggie-name" type="text" maxlength="40" [value]="veggieName()" (input)="onVeggie($event)" />
+  <form (submit)="addItem($event)">
+    <h2>Vegetable or other thing</h2>
+    <span class="field-label">Kind</span>
+    <div class="segment" role="group" aria-label="Kind">
+      <button type="button" [attr.aria-pressed]="kind() === 'veggie'" (click)="pickKind('veggie')">Vegetable</button>
+      <button type="button" [attr.aria-pressed]="kind() === 'other'" (click)="pickKind('other')">Other</button>
+    </div>
 
-    <label class="field-label" for="veggie-price">Price</label>
+    <label class="field-label" for="item-name">Name</label>
+    <input id="item-name" type="text" maxlength="40" [value]="itemName()" (input)="onItem($event)" />
+
+    <label class="field-label" for="item-price">Price</label>
     <input
-      id="veggie-price"
+      id="item-price"
       class="token-input"
       type="text"
       inputmode="decimal"
@@ -57,23 +87,48 @@
       }
     </div>
 
-    <label class="field-label" for="veggie-photo">Fresh photograph</label>
-    <input #photoInput id="veggie-photo" type="file" accept="image/jpeg,image/png,image/webp" (change)="onPhoto($event)" />
+    <label class="field-label" for="item-photo">Fresh photograph</label>
+    <input #photoInput id="item-photo" type="file" accept="image/jpeg,image/png,image/webp" (change)="onPhoto($event)" />
 
-    <button class="solid" type="submit" [disabled]="busy()">Add vegetable</button>
+    <button class="solid" type="submit" [disabled]="busy()">
+      {{ kind() === 'veggie' ? 'Add vegetable' : 'Add other thing' }}
+    </button>
   </form>
 
+  <h2>Vegetables</h2>
+  @if (vegetables().length === 0) {
+    <p class="empty">No vegetable yet.</p>
+  }
   <div class="veggies">
-    @for (veggie of current.veggies; track veggie.id) {
+    @for (item of vegetables(); track item.id) {
       <article class="veggie">
         <span class="photo">
-          <img [src]="veggie.photo.url" [alt]="veggie.name" />
+          <img [src]="item.photo.url" [alt]="item.name" />
           <span class="fresh">Fresh</span>
         </span>
         <span>
-          <strong>{{ veggie.name }}</strong>
-          <p class="price">{{ money(veggie.price) }} / {{ veggie.unit }}</p>
-          <button class="quiet" type="button" (click)="removeVeggie(veggie.id)">Remove</button>
+          <strong>{{ item.name }}</strong>
+          <p class="price">{{ money(item.price) }} / {{ item.unit }}</p>
+          <button class="quiet" type="button" (click)="removeItem(item.id)">Remove</button>
+        </span>
+      </article>
+    }
+  </div>
+
+  <h2>Other things</h2>
+  @if (others().length === 0) {
+    <p class="empty">Nothing else yet.</p>
+  }
+  <div class="veggies">
+    @for (item of others(); track item.id) {
+      <article class="veggie">
+        <span class="photo">
+          <img [src]="item.photo.url" [alt]="item.name" />
+        </span>
+        <span>
+          <strong>{{ item.name }}</strong>
+          <p class="price">{{ money(item.price) }} / {{ item.unit }}</p>
+          <button class="quiet" type="button" (click)="removeItem(item.id)">Remove</button>
         </span>
       </article>
     }

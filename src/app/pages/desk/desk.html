@@ -1,5 +1,5 @@
 <h1>Carts</h1>
-<p class="lede">A small token creates a cart. Then load it with vegetables and a schedule.</p>
+<p class="lede">A small token creates a cart. Each address has its own schedule.</p>
 
 <form (submit)="$event.preventDefault(); create()">
   <label class="field-label" for="cart-token">Cart token</label>
@@ -18,27 +18,53 @@
   <label class="field-label" for="cart-name">Name</label>
   <input id="cart-name" type="text" maxlength="40" [value]="name()" (input)="onName($event)" />
 
-  <span class="field-label">Days</span>
-  <div class="days">
-    @for (day of days; track day) {
-      <button type="button" [class.on]="chosenDays().includes(day)" (click)="toggleDay(day)">
-        {{ day }}
-      </button>
-    }
-  </div>
+  <h2>Addresses</h2>
+  @for (stop of stops(); track stop.key) {
+    <fieldset class="stop-card">
+      <label class="field-label" [attr.for]="'address-' + stop.key">Address</label>
+      <textarea
+        [id]="'address-' + stop.key"
+        rows="2"
+        maxlength="160"
+        [value]="stop.address"
+        (input)="onAddress(stop.key, $event)"
+        placeholder="Where this round arrives"
+      ></textarea>
 
-  <div class="split">
-    <label class="field-label" for="start">From
-      <input id="start" type="time" [value]="start()" (input)="onStart($event)" />
-    </label>
-    <label class="field-label" for="end">To
-      <input id="end" type="time" [value]="end()" (input)="onEnd($event)" />
-    </label>
-  </div>
+      <span class="field-label">Days</span>
+      <div class="days">
+        @for (day of days; track day) {
+          <button type="button" [class.on]="stop.days.includes(day)" (click)="toggleDay(stop.key, day)">
+            {{ day }}
+          </button>
+        }
+      </div>
 
-  <label class="field-label" for="note">Note</label>
-  <input id="note" type="text" maxlength="80" [value]="note()" (input)="onNote($event)" />
+      <div class="split">
+        <label class="field-label" [attr.for]="'start-' + stop.key">From
+          <input [id]="'start-' + stop.key" type="time" [value]="stop.start" (input)="onStart(stop.key, $event)" />
+        </label>
+        <label class="field-label" [attr.for]="'end-' + stop.key">To
+          <input [id]="'end-' + stop.key" type="time" [value]="stop.end" (input)="onEnd(stop.key, $event)" />
+        </label>
+      </div>
 
+      <label class="field-label" [attr.for]="'note-' + stop.key">Note</label>
+      <input
+        [id]="'note-' + stop.key"
+        type="text"
+        maxlength="80"
+        [value]="stop.note"
+        (input)="onNote(stop.key, $event)"
+      />
+
+      @if (stops().length > 1) {
+        <button class="quiet" type="button" (click)="removeDraft(stop.key)">Remove this address</button>
+      }
+    </fieldset>
+  }
+
+  <button class="quiet" type="button" (click)="addDraft()">Add another address</button>
   <button class="solid" type="submit" [disabled]="busy()">Create cart</button>
 </form>
 
@@ -51,12 +77,12 @@
     <a class="cart-card text" [routerLink]="['/home/desk', cart.id]">
       <span>
         <strong>{{ cart.name }}</strong>
-        <p>{{ describeSchedule(cart.schedule) }}</p>
+        <p>{{ describeStops(cart.stops) }}</p>
         @if (cart.token) {
           <p class="token-line">{{ cart.token }}</p>
         }
       </span>
-      <span class="pill">{{ cart.loaded ? cart.veggies.length + ' vegetables' : 'Empty' }}</span>
+      <span class="pill">{{ cart.loaded ? tally(cart.items) : 'Empty' }}</span>
     </a>
   }
 </div>

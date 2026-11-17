@@ -28,5 +28,6 @@ describe('desk', () => {
     expect(input).not.toBeNull();
     expect(input.classList.contains('token-input')).toBe(true);
     expect(root.textContent).toContain('This token is the cart.');
+    expect(root.textContent).toContain('Add another address');
   });
 });

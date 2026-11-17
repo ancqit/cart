@@ -1,9 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CartApi } from '../../cart-api';
 import {
   addLine,
-  addressOk,
   basketTotal,
   changeQty,
   coverUrl,
@@ -30,8 +29,10 @@ export class OpenCart {
   readonly session = inject(Session);
 
   readonly cart = signal<Cart | null>(null);
+  readonly vegetables = computed(() => this.cart()?.items.filter((item) => item.kind === 'veggie') ?? []);
+  readonly others = computed(() => this.cart()?.items.filter((item) => item.kind === 'other') ?? []);
   readonly lines = signal<Line[]>([]);
-  readonly address = signal('');
+  readonly stopId = signal('');
   readonly slip = signal<Slip | null>(null);
   readonly error = signal('');
   readonly busy = signal(false);
@@ -39,7 +40,6 @@ export class OpenCart {
   readonly money = money;
   readonly describeSchedule = describeSchedule;
   readonly basketTotal = basketTotal;
-  readonly addressOk = addressOk;
   readonly coverUrl = coverUrl;
 
   constructor() {
@@ -56,29 +56,30 @@ export class OpenCart {
   }
 
   qtyOf(id: string): number {
-    return this.lines().find((line) => line.veggieId === id)?.qty ?? 0;
+    return this.lines().find((line) => line.itemId === id)?.qty ?? 0;
   }
 
-  add(veggieId: string): void {
-    const veggie = this.cart()?.veggies.find((item) => item.id === veggieId);
-    if (!veggie) {
+  chooseStop(id: string): void {
+    this.stopId.set(id);
+  }
+
+  add(itemId: string): void {
+    const item = this.cart()?.items.find((entry) => entry.id === itemId);
+    if (!item) {
       return;
     }
-    this.lines.update((lines) => addLine(lines, veggie));
+    this.lines.update((lines) => addLine(lines, item));
   }
 
   bump(id: string, delta: number): void {
     this.lines.update((lines) => changeQty(lines, id, delta));
   }
 
-  onAddress(event: Event): void {
-    this.address.set((event.target as HTMLTextAreaElement).value);
-  }
-
   async place(event: Event): Promise<void> {
     event.preventDefault();
     const current = this.cart();
-    if (!current || !addressOk(this.address()) || this.lines().length === 0) {
+    const stopId = this.stopId();
+    if (!current || !stopId || this.lines().length === 0) {
       return;
     }
     await runBusy(
@@ -87,8 +88,8 @@ export class OpenCart {
       async () => {
         const slip = await this.api.placeOrder(this.session.token(), {
           cart_id: current.id,
-          address: this.address().replace(/\s+/g, ' ').trim(),
-          lines: this.lines().map((line) => ({ veggie_id: line.veggieId, qty: line.qty })),
+          stop_id: stopId,
+          lines: this.lines().map((line) => ({ item_id: line.itemId, qty: line.qty })),
         });
         this.slip.set(slip);
         writeSlip(slip);
@@ -101,7 +102,6 @@ export class OpenCart {
     this.slip.set(null);
     writeSlip(null);
     this.lines.set([]);
-    this.address.set('');
   }
 
   private async load(id: string): Promise<void> {
@@ -111,7 +111,10 @@ export class OpenCart {
       async () => {
         const cart = await this.api.cart(this.session.token(), id);
         this.cart.set(cart);
-        this.lines.update((lines) => keepLines(lines, cart.veggies));
+        if (!cart.stops.some((stop) => stop.id === this.stopId())) {
+          this.stopId.set(cart.stops[0]?.id ?? '');
+        }
+        this.lines.update((lines) => keepLines(lines, cart.items));
         this.ready.set(true);
       },
       () => this.leave(),
