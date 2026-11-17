@@ -17,8 +17,17 @@ export interface StoredPhoto {
   filename: string;
 }
 
-export interface Veggie {
+export type Kind = 'veggie' | 'other';
+
+export interface Stop {
   id: string;
+  address: string;
+  schedule: Schedule;
+}
+
+export interface Item {
+  id: string;
+  kind: Kind;
   name: string;
   price: number;
   unit: string;
@@ -29,14 +38,15 @@ export interface Cart {
   id: string;
   name: string;
   token?: string;
-  schedule: Schedule;
-  veggies: Veggie[];
+  stops: Stop[];
+  items: Item[];
   loaded: boolean;
   created_at: string;
 }
 
 export interface Line {
-  veggieId: string;
+  itemId: string;
+  kind: Kind;
   name: string;
   price: number;
   unit: string;
@@ -44,7 +54,8 @@ export interface Line {
 }
 
 export interface SlipLine {
-  veggie_id: string;
+  item_id: string;
+  kind: Kind;
   name: string;
   price: number;
   unit: string;
@@ -67,6 +78,6 @@ export interface Slip {
 export type Role = 'entity' | 'loader' | 'cart' | 'driver';
 
 export interface OrderLine {
-  veggie_id: string;
+  item_id: string;
   qty: number;
 }

@@ -1,7 +1,7 @@
 import { addLine, addressOk, basketTotal, cartTokenOk, changeQty, describeSchedule, isLoaded, keepLines, money, parsePrice, scheduleOk } from './flow';
 import { Line } from './models';
 
-const spinach = { id: 'v1', name: 'Spinach', price: 40, unit: 'bunch' };
+const spinach = { id: 'v1', kind: 'veggie' as const, name: 'Spinach', price: 40, unit: 'bunch' };
 
 describe('cart flow', () => {
   it('describes a round and a price', () => {
@@ -29,7 +29,9 @@ describe('cart flow', () => {
     let lines: Line[] = [];
     lines = addLine(lines, spinach);
     lines = addLine(lines, spinach);
-    expect(lines).toEqual([{ veggieId: 'v1', name: 'Spinach', price: 40, unit: 'bunch', qty: 2 }]);
+    expect(lines).toEqual([
+      { itemId: 'v1', kind: 'veggie', name: 'Spinach', price: 40, unit: 'bunch', qty: 2 },
+    ]);
     expect(basketTotal(lines)).toBe(80);
     lines = changeQty(lines, 'v1', 30);
     expect(lines[0].qty).toBe(20);
@@ -39,7 +41,7 @@ describe('cart flow', () => {
 
   it('keeps only vegetables still on the cart', () => {
     const lines = addLine([], spinach);
-    expect(isLoaded({ veggies: [spinach] })).toBe(true);
+    expect(isLoaded({ items: [spinach] })).toBe(true);
     expect(keepLines(lines, [])).toEqual([]);
     expect(keepLines(lines, [{ id: 'v1' }])).toEqual(lines);
   });

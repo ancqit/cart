@@ -7,10 +7,17 @@ import { OpenCart } from './open';
 const cart: Cart = {
   id: 'c1',
   name: 'Park gate',
-  schedule: { days: ['Mon', 'Wed'], start: '07:00', end: '09:00', note: 'Park gate' },
-  veggies: [
+  stops: [
+    {
+      id: 's1',
+      address: '12 Neem Lane near the park',
+      schedule: { days: ['Mon', 'Wed'], start: '07:00', end: '09:00', note: 'Park gate' },
+    },
+  ],
+  items: [
     {
       id: 'v1',
+      kind: 'veggie',
       name: 'Spinach',
       price: 40,
       unit: 'bunch',
@@ -18,6 +25,18 @@ const cart: Cart = {
         url: 'https://media.example/cart/photos/spinach.jpg',
         content_type: 'image/jpeg',
         filename: 'spinach.jpg',
+      },
+    },
+    {
+      id: 'o1',
+      kind: 'other',
+      name: 'Honey',
+      price: 120,
+      unit: 'piece',
+      photo: {
+        url: 'https://media.example/cart/photos/honey.jpg',
+        content_type: 'image/jpeg',
+        filename: 'honey.jpg',
       },
     },
   ],
@@ -30,9 +49,9 @@ const slip: Slip = {
   driver_token: 'K7M2P4QX',
   cart_id: 'c1',
   cart_name: 'Park gate',
-  schedule: cart.schedule,
+  schedule: cart.stops[0].schedule,
   address: '12 Neem Lane near the park',
-  lines: [{ veggie_id: 'v1', name: 'Spinach', price: 40, unit: 'bunch', qty: 1 }],
+  lines: [{ item_id: 'v1', kind: 'veggie', name: 'Spinach', price: 40, unit: 'bunch', qty: 1 }],
   total: 40,
   status: 'open',
   created_at: '2026-11-17T00:00:00+00:00',
@@ -67,22 +86,20 @@ describe('open cart', () => {
     const fixture = TestBed.createComponent(OpenCart);
     fixture.detectChanges();
     await fixture.whenStable();
+    await Promise.resolve();
     fixture.detectChanges();
 
     const root = fixture.nativeElement as HTMLElement;
     expect(root.textContent).toContain('Spinach');
+    expect(root.textContent).toContain('Honey');
+    expect(root.textContent).toContain('12 Neem Lane near the park');
     expect(root.textContent).toContain('₹40');
     expect(root.textContent).toContain('Fresh');
     expect(root.querySelector('img')?.getAttribute('src')).toBe(
       'https://media.example/cart/photos/spinach.jpg',
     );
 
-    (root.querySelector('[data-veggie="v1"]') as HTMLButtonElement).click();
-    fixture.detectChanges();
-
-    const address = root.querySelector('#address') as HTMLTextAreaElement;
-    address.value = '12 Neem Lane near the park';
-    address.dispatchEvent(new Event('input'));
+    (root.querySelector('[data-item="v1"]') as HTMLButtonElement).click();
     fixture.detectChanges();
 
     (root.querySelector('form.basket button[type="submit"]') as HTMLButtonElement).click();

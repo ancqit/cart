@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CartApi } from '../../cart-api';
 import {
@@ -6,6 +6,7 @@ import {
   Day,
   UNITS,
   Unit,
+  addressOk,
   describeSchedule,
   money,
   nameOk,
@@ -13,7 +14,7 @@ import {
   parsePrice,
   scheduleOk,
 } from '../../flow';
-import { Cart, Schedule } from '../../models';
+import { Cart, Kind, Schedule } from '../../models';
 import { runBusy } from '../../run';
 import { Session } from '../../session';
 
@@ -30,11 +31,15 @@ export class DeskEditPage {
   private readonly photoInput = viewChild<ElementRef<HTMLInputElement>>('photoInput');
 
   readonly cart = signal<Cart | null>(null);
-  readonly chosenDays = signal<string[]>([]);
+  readonly vegetables = computed(() => this.cart()?.items.filter((item) => item.kind === 'veggie') ?? []);
+  readonly others = computed(() => this.cart()?.items.filter((item) => item.kind === 'other') ?? []);
+  readonly address = signal('');
+  readonly chosenDays = signal<string[]>(['Mon', 'Wed', 'Fri']);
   readonly start = signal('07:00');
   readonly end = signal('09:30');
   readonly note = signal('');
-  readonly veggieName = signal('');
+  readonly kind = signal<Kind>('veggie');
+  readonly itemName = signal('');
   readonly price = signal('');
   readonly chosenUnit = signal<Unit>('kg');
   readonly photo = signal<File | null>(null);
@@ -45,7 +50,6 @@ export class DeskEditPage {
   readonly units = UNITS;
   readonly money = money;
   readonly describeSchedule = describeSchedule;
-  private seeded = false;
 
   constructor() {
     void this.load(this.route.snapshot.paramMap.get('id') ?? '');
@@ -55,6 +59,10 @@ export class DeskEditPage {
     this.chosenDays.update((days) =>
       days.includes(day) ? days.filter((item) => item !== day) : [...days, day],
     );
+  }
+
+  onAddress(event: Event): void {
+    this.address.set((event.target as HTMLTextAreaElement).value);
   }
 
   onStart(event: Event): void {
@@ -69,8 +77,12 @@ export class DeskEditPage {
     this.note.set((event.target as HTMLInputElement).value);
   }
 
-  onVeggie(event: Event): void {
-    this.veggieName.set((event.target as HTMLInputElement).value);
+  pickKind(kind: Kind): void {
+    this.kind.set(kind);
+  }
+
+  onItem(event: Event): void {
+    this.itemName.set((event.target as HTMLInputElement).value);
   }
 
   onPrice(event: Event): void {
@@ -86,7 +98,7 @@ export class DeskEditPage {
     this.photo.set(input.files?.[0] ?? null);
   }
 
-  async saveSchedule(event: Event): Promise<void> {
+  async addStop(event: Event): Promise<void> {
     event.preventDefault();
     const current = this.cart();
     if (!current) {
@@ -98,6 +110,11 @@ export class DeskEditPage {
       end: this.end(),
       note: this.note().replace(/\s+/g, ' ').trim(),
     };
+    const address = this.address().replace(/\s+/g, ' ').trim();
+    if (!addressOk(address)) {
+      this.error.set('Address must be 8 to 160 characters.');
+      return;
+    }
     if (!scheduleOk(schedule)) {
       this.error.set('Choose at least one day, and end the round after it starts.');
       return;
@@ -106,13 +123,31 @@ export class DeskEditPage {
       this.busy,
       this.error,
       async () => {
-        this.cart.set(await this.api.saveSchedule(this.session.token(), current.id, schedule));
+        this.cart.set(await this.api.addStop(this.session.token(), current.id, { address, schedule }));
+        this.address.set('');
+        this.note.set('');
       },
       () => this.leave(),
     );
   }
 
-  async addVeggie(event: Event): Promise<void> {
+  async removeStop(stopId: string): Promise<void> {
+    const current = this.cart();
+    if (!current || current.stops.length < 2) {
+      return;
+    }
+    await runBusy(
+      this.busy,
+      this.error,
+      async () => {
+        await this.api.removeStop(this.session.token(), current.id, stopId);
+        await this.reload(current.id);
+      },
+      () => this.leave(),
+    );
+  }
+
+  async addItem(event: Event): Promise<void> {
     event.preventDefault();
     const current = this.cart();
     const file = this.photo();
@@ -120,7 +155,7 @@ export class DeskEditPage {
     if (!current) {
       return;
     }
-    if (!nameOk(this.veggieName())) {
+    if (!nameOk(this.itemName())) {
       this.error.set('Name must be 2 to 40 characters.');
       return;
     }
@@ -137,14 +172,15 @@ export class DeskEditPage {
       this.error,
       async () => {
         const photo = await this.api.uploadPhoto(this.session.token(), file);
-        const cart = await this.api.addVeggie(this.session.token(), current.id, {
-          name: this.veggieName().replace(/\s+/g, ' ').trim(),
+        const cart = await this.api.addItem(this.session.token(), current.id, {
+          kind: this.kind(),
+          name: this.itemName().replace(/\s+/g, ' ').trim(),
           price,
           unit: this.chosenUnit(),
           photo,
         });
         this.cart.set(cart);
-        this.veggieName.set('');
+        this.itemName.set('');
         this.price.set('');
         this.photo.set(null);
         const input = this.photoInput()?.nativeElement;
@@ -156,7 +192,7 @@ export class DeskEditPage {
     );
   }
 
-  async removeVeggie(veggieId: string): Promise<void> {
+  async removeItem(itemId: string): Promise<void> {
     const current = this.cart();
     if (!current) {
       return;
@@ -165,7 +201,7 @@ export class DeskEditPage {
       this.busy,
       this.error,
       async () => {
-        await this.api.removeVeggie(this.session.token(), current.id, veggieId);
+        await this.api.removeItem(this.session.token(), current.id, itemId);
         await this.reload(current.id);
       },
       () => this.leave(),
@@ -201,15 +237,7 @@ export class DeskEditPage {
   }
 
   private async reload(id: string): Promise<void> {
-    const cart = await this.api.cart(this.session.token(), id);
-    this.cart.set(cart);
-    if (!this.seeded) {
-      this.chosenDays.set(cart.schedule.days);
-      this.start.set(cart.schedule.start);
-      this.end.set(cart.schedule.end);
-      this.note.set(cart.schedule.note);
-      this.seeded = true;
-    }
+    this.cart.set(await this.api.cart(this.session.token(), id));
   }
 
   private leave(): void {
