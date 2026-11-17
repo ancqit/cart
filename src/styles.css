@@ -286,6 +286,47 @@ select {
   padding: 10px 14px;
 }
 
+a.quiet {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+
+.text-link {
+  display: block;
+  margin-top: 16px;
+  text-align: center;
+  color: var(--gold-deep);
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.lines button {
+  text-align: left;
+  border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  background: #fffdf8;
+  color: var(--ink);
+  border-radius: 16px;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.lines button.on {
+  border-color: var(--ink);
+}
+
+.mark {
+  display: block;
+  width: 180px;
+  height: 180px;
+  margin: 18px auto 0;
+}
+
 .error {
   margin: 12px 0 0;
   color: #8c3a2f;

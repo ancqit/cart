@@ -1,0 +1,32 @@
+<section class="gate">
+  <div class="theme-float">
+    <app-theme-picker />
+  </div>
+  <div class="card">
+    <p class="brand">Cart</p>
+    <h1>QR</h1>
+    <p class="lede">A light mark for this site. Pick a line, then download the picture.</p>
+
+    <p class="kicker">Line</p>
+    <div class="lines" role="listbox" aria-label="Line">
+      @for (line of lines; track line.id) {
+        <button
+          type="button"
+          role="option"
+          [attr.aria-selected]="line.id === chosen()"
+          [class.on]="line.id === chosen()"
+          (click)="choose(line.id)"
+        >
+          {{ line.text }}
+        </button>
+      }
+    </div>
+
+    @if (mark()) {
+      <img class="mark" [src]="mark()" alt="QR for this site" />
+    }
+    <p class="hint">{{ site }}</p>
+    <button class="solid wide" type="button" (click)="download()" [disabled]="!mark()">Download PNG</button>
+    <a class="quiet" routerLink="/">Back to the gate</a>
+  </div>
+</section>
