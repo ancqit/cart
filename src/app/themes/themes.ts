@@ -1,0 +1,178 @@
+export interface Theme {
+  id: string;
+  name: string;
+  view: string;
+  wallpaper: string;
+  preview: string;
+  offered: boolean;
+  light: boolean;
+  paper: string;
+  ink: string;
+  accent: string;
+  accentDeep: string;
+  wash: string;
+  sheet: string;
+  onAccent: string;
+  radius: string;
+}
+
+// Same light themes as herbant and binter. Clock is saved and not offered.
+export const themes: Theme[] = [
+  {
+    id: 'meadow',
+    name: 'Meadow',
+    view: 'Fresh',
+    wallpaper: '/wallpapers/meadow.svg',
+    preview: '/wallpapers/meadow.svg',
+    offered: true,
+    light: true,
+    paper: '#f7fbf4',
+    ink: '#243024',
+    accent: '#6fa35a',
+    accentDeep: '#3f6b34',
+    wash: '#f3f8ef',
+    sheet: 'rgba(247, 251, 244, 0.92)',
+    onAccent: '#f7fbf4',
+    radius: '24px',
+  },
+  {
+    id: 'blossom',
+    name: 'Blossom',
+    view: 'Soft cards',
+    wallpaper: '/wallpapers/blossom.svg',
+    preview: '/wallpapers/blossom.svg',
+    offered: true,
+    light: true,
+    paper: '#fff7f8',
+    ink: '#3a2430',
+    accent: '#d46b8a',
+    accentDeep: '#9c4564',
+    wash: '#fff5f7',
+    sheet: 'rgba(255, 247, 248, 0.92)',
+    onAccent: '#fff7f8',
+    radius: '32px',
+  },
+  {
+    id: 'linen',
+    name: 'Linen',
+    view: 'Quiet paper',
+    wallpaper: '/wallpapers/linen.svg',
+    preview: '/wallpapers/linen.svg',
+    offered: true,
+    light: true,
+    paper: '#fbf7f0',
+    ink: '#2c261f',
+    accent: '#b08968',
+    accentDeep: '#7d5a43',
+    wash: '#f7f1e6',
+    sheet: 'rgba(251, 247, 240, 0.94)',
+    onAccent: '#fffaf3',
+    radius: '18px',
+  },
+  {
+    id: 'shore',
+    name: 'Shore',
+    view: 'Open',
+    wallpaper: '/wallpapers/shore.svg',
+    preview: '/wallpapers/shore.svg',
+    offered: true,
+    light: true,
+    paper: '#f7fcfd',
+    ink: '#1d333c',
+    accent: '#5aa7c2',
+    accentDeep: '#2f6f86',
+    wash: '#f4fafc',
+    sheet: 'rgba(247, 252, 253, 0.84)',
+    onAccent: '#f7fcfd',
+    radius: '30px',
+  },
+  {
+    id: 'apricot',
+    name: 'Apricot',
+    view: 'Sunny',
+    wallpaper: '/wallpapers/apricot.svg',
+    preview: '/wallpapers/apricot.svg',
+    offered: true,
+    light: true,
+    paper: '#fff8f3',
+    ink: '#3b271c',
+    accent: '#e08a45',
+    accentDeep: '#a85b24',
+    wash: '#fff6ee',
+    sheet: 'rgba(255, 248, 243, 0.94)',
+    onAccent: '#fff8f3',
+    radius: '26px',
+  },
+  {
+    id: 'lemon',
+    name: 'Lemon',
+    view: 'Bright',
+    wallpaper: '/wallpapers/lemon.svg',
+    preview: '/wallpapers/lemon.svg',
+    offered: true,
+    light: true,
+    paper: '#fffdf4',
+    ink: '#333014',
+    accent: '#e2b423',
+    accentDeep: '#8d7010',
+    wash: '#fffbe8',
+    sheet: 'rgba(255, 253, 244, 0.94)',
+    onAccent: '#333014',
+    radius: '16px',
+  },
+  {
+    id: 'sky',
+    name: 'Sky',
+    view: 'High',
+    wallpaper: '/wallpapers/sky.svg',
+    preview: '/wallpapers/sky.svg',
+    offered: true,
+    light: true,
+    paper: '#f8fbff',
+    ink: '#243044',
+    accent: '#7aa2e3',
+    accentDeep: '#3d64a8',
+    wash: '#f5f9ff',
+    sheet: 'rgba(248, 251, 255, 0.88)',
+    onAccent: '#f8fbff',
+    radius: '36px',
+  },
+  {
+    id: 'clouds',
+    name: 'Clouds',
+    view: 'Windows',
+    wallpaper: '/wallpapers/clouds.svg',
+    preview: '/wallpapers/clouds.svg',
+    offered: true,
+    light: true,
+    paper: '#f7fbff',
+    ink: '#1a3148',
+    accent: '#3d8fe0',
+    accentDeep: '#1d5f99',
+    wash: '#7eb6f0',
+    sheet: 'rgba(247, 251, 255, 0.92)',
+    onAccent: '#f7fbff',
+    radius: '28px',
+  },
+  {
+    id: 'clock',
+    name: 'Clock',
+    view: 'Opacity 0.3',
+    wallpaper: '/wallpapers/clouds.svg',
+    preview: '/wallpapers/clock-faint.svg',
+    offered: false,
+    light: false,
+    paper: '#f4efe4',
+    ink: '#1c1712',
+    accent: '#c6a15b',
+    accentDeep: '#8a6840',
+    wash: '#16324a',
+    sheet: 'rgba(244, 239, 228, 0.94)',
+    onAccent: '#1c140c',
+    radius: '28px',
+  },
+];
+
+export const offeredThemes = themes.filter((theme) => theme.offered);
+
+export const defaultTheme = themes.find((theme) => theme.id === 'meadow') ?? offeredThemes[0];

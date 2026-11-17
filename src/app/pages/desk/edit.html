@@ -1,0 +1,83 @@
+<a class="back" routerLink="/home/desk">All carts</a>
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+
+@if (ready() && cart(); as current) {
+  <h1>{{ current.name }}</h1>
+  @if (current.token) {
+    <p class="token-line">Token · {{ current.token }}</p>
+  }
+  <p class="lede">{{ describeSchedule(current.schedule) }}</p>
+
+  <form (submit)="saveSchedule($event)">
+    <span class="field-label">Schedule</span>
+    <div class="days">
+      @for (day of days; track day) {
+        <button type="button" [class.on]="chosenDays().includes(day)" (click)="toggleDay(day)">
+          {{ day }}
+        </button>
+      }
+    </div>
+    <div class="split">
+      <label class="field-label" for="edit-start">From
+        <input id="edit-start" type="time" [value]="start()" (input)="onStart($event)" />
+      </label>
+      <label class="field-label" for="edit-end">To
+        <input id="edit-end" type="time" [value]="end()" (input)="onEnd($event)" />
+      </label>
+    </div>
+    <label class="field-label" for="edit-note">Note</label>
+    <input id="edit-note" type="text" maxlength="80" [value]="note()" (input)="onNote($event)" />
+    <button class="solid" type="submit" [disabled]="busy()">Save schedule</button>
+  </form>
+
+  <form (submit)="addVeggie($event)">
+    <h2>Vegetable</h2>
+    <label class="field-label" for="veggie-name">Name</label>
+    <input id="veggie-name" type="text" maxlength="40" [value]="veggieName()" (input)="onVeggie($event)" />
+
+    <label class="field-label" for="veggie-price">Price</label>
+    <input
+      id="veggie-price"
+      class="token-input"
+      type="text"
+      inputmode="decimal"
+      [value]="price()"
+      (input)="onPrice($event)"
+    />
+
+    <span class="field-label">Unit</span>
+    <div class="segment" role="group" aria-label="Unit">
+      @for (unit of units; track unit) {
+        <button type="button" [attr.aria-pressed]="unit === chosenUnit()" (click)="pickUnit(unit)">
+          {{ unit }}
+        </button>
+      }
+    </div>
+
+    <label class="field-label" for="veggie-photo">Fresh photograph</label>
+    <input #photoInput id="veggie-photo" type="file" accept="image/jpeg,image/png,image/webp" (change)="onPhoto($event)" />
+
+    <button class="solid" type="submit" [disabled]="busy()">Add vegetable</button>
+  </form>
+
+  <div class="veggies">
+    @for (veggie of current.veggies; track veggie.id) {
+      <article class="veggie">
+        <span class="photo">
+          <img [src]="veggie.photo.url" [alt]="veggie.name" />
+          <span class="fresh">Fresh</span>
+        </span>
+        <span>
+          <strong>{{ veggie.name }}</strong>
+          <p class="price">{{ money(veggie.price) }} / {{ veggie.unit }}</p>
+          <button class="quiet" type="button" (click)="removeVeggie(veggie.id)">Remove</button>
+        </span>
+      </article>
+    }
+  </div>
+
+  <button class="quiet" type="button" (click)="removeCart()" [disabled]="busy()">Remove cart</button>
+}

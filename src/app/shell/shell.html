@@ -1,0 +1,26 @@
+<div class="frame">
+  <header class="top">
+    <div>
+      <p class="brand">Cart</p>
+      <p class="who">{{ session.title() }}</p>
+    </div>
+    <div class="actions">
+      <app-theme-picker />
+      <button class="leave" type="button" (click)="leave()">Leave</button>
+    </div>
+  </header>
+
+  <main class="sheet">
+    <router-outlet />
+  </main>
+
+  <p class="copyright">© 2026 Sunskriti Data management company</p>
+
+  <nav class="dock" aria-label="Sections">
+    @for (item of items(); track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="on" ariaCurrentWhenActive="page">
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+</div>

@@ -1,0 +1,27 @@
+<h1>Loaded carts</h1>
+<p class="lede">Choose a cart. The schedule and the vegetables are inside.</p>
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+
+@if (ready() && carts().length === 0) {
+  <p class="empty">No cart is loaded yet.</p>
+}
+
+<div class="stack">
+  @for (cart of carts(); track cart.id) {
+    <a class="cart-card" [routerLink]="['/home/carts', cart.id]">
+      <span class="cover">
+        @if (cover(cart); as src) {
+          <img [src]="src" alt="" />
+        }
+      </span>
+      <span>
+        <strong>{{ cart.name }}</strong>
+        <p>{{ describeSchedule(cart.schedule) }}</p>
+        <p>{{ cart.veggies.length }} vegetables</p>
+      </span>
+    </a>
+  }
+</div>
