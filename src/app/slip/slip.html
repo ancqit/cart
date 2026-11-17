@@ -1,0 +1,26 @@
+<article class="note">
+  <p class="kicker">Token for the driver</p>
+  <p class="token">{{ slip().driver_token }}</p>
+  <h2>{{ slip().cart_name }}</h2>
+  <p>{{ describeSchedule(slip().schedule) }}</p>
+  @if (slip().schedule.note) {
+    <p>{{ slip().schedule.note }}</p>
+  }
+  <p class="place">{{ slip().address }}</p>
+  <ul class="list">
+    @for (line of slip().lines; track line.veggie_id) {
+      <li>
+        <div>
+          <strong>{{ line.name }}</strong>
+          <p>{{ line.qty }} {{ line.unit }} · {{ money(line.price) }}</p>
+        </div>
+      </li>
+    }
+  </ul>
+  <p class="total">{{ money(slip().total) }}</p>
+  @if (showArrive()) {
+    <button class="solid" type="button" (click)="arrived.emit()" [disabled]="busy() || slip().status === 'arrived'">
+      {{ slip().status === 'arrived' ? 'Arrived' : 'Arrived at the address' }}
+    </button>
+  }
+</article>

@@ -1,0 +1,92 @@
+@if (session.role() === 'entity') {
+  <a class="back" routerLink="/home/carts">Loaded carts</a>
+}
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+
+@if (!ready()) {
+  <p class="lede">Opening the cart.</p>
+} @else if (cart(); as current) {
+  <h1>{{ current.name }}</h1>
+  <p class="lede">{{ describeSchedule(current.schedule) }}</p>
+  @if (current.schedule.note) {
+    <p>{{ current.schedule.note }}</p>
+  }
+
+  @if (slip(); as currentSlip) {
+    <app-slip [slip]="currentSlip" />
+    <button class="quiet" type="button" (click)="again()">Another order</button>
+  } @else {
+    <h2>Vegetables</h2>
+    @if (current.veggies.length === 0) {
+      <p class="empty">This cart is not loaded yet.</p>
+    }
+    <div class="veggies">
+      @for (veggie of current.veggies; track veggie.id) {
+        <article class="veggie">
+          <span class="photo">
+            @if (coverUrl(veggie.photo.url); as src) {
+              <img [src]="src" [alt]="veggie.name" />
+            }
+            <span class="fresh">Fresh</span>
+          </span>
+          <span>
+            <strong>{{ veggie.name }}</strong>
+            <p class="price">{{ money(veggie.price) }} / {{ veggie.unit }}</p>
+            <button class="solid" type="button" (click)="add(veggie.id)" [attr.data-veggie]="veggie.id">
+              {{ qtyOf(veggie.id) ? 'Add · ' + qtyOf(veggie.id) : 'Add' }}
+            </button>
+          </span>
+        </article>
+      }
+    </div>
+
+    <form class="basket" (submit)="place($event)">
+      <h2>Basket</h2>
+      @if (lines().length === 0) {
+        <p class="empty">Add a vegetable for the driver.</p>
+      }
+      <ul class="list">
+        @for (line of lines(); track line.veggieId) {
+          <li>
+            <div>
+              <strong>{{ line.name }}</strong>
+              <p>{{ money(line.price) }} / {{ line.unit }}</p>
+            </div>
+            <span class="stepper">
+              <button type="button" (click)="bump(line.veggieId, -1)" [attr.aria-label]="'Fewer ' + line.name">
+                −
+              </button>
+              <span>{{ line.qty }}</span>
+              <button type="button" (click)="bump(line.veggieId, 1)" [attr.aria-label]="'More ' + line.name">
+                +
+              </button>
+            </span>
+          </li>
+        }
+      </ul>
+      @if (lines().length) {
+        <p class="total">{{ money(basketTotal(lines())) }}</p>
+      }
+
+      <label class="field-label" for="address">Address</label>
+      <textarea
+        id="address"
+        rows="3"
+        [value]="address()"
+        (input)="onAddress($event)"
+        placeholder="Where the cart should arrive"
+      ></textarea>
+
+      <button
+        class="solid wide"
+        type="submit"
+        [disabled]="busy() || lines().length === 0 || !addressOk(address())"
+      >
+        Token for the driver
+      </button>
+    </form>
+  }
+}

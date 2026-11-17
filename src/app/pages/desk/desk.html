@@ -1,0 +1,62 @@
+<h1>Carts</h1>
+<p class="lede">A small token creates a cart. Then load it with vegetables and a schedule.</p>
+
+<form (submit)="$event.preventDefault(); create()">
+  <label class="field-label" for="cart-token">Cart token</label>
+  <input
+    id="cart-token"
+    class="token-input"
+    type="text"
+    autocomplete="off"
+    spellcheck="false"
+    maxlength="32"
+    [value]="cartToken()"
+    (input)="onToken($event)"
+  />
+  <p class="hint">This token is the cart.</p>
+
+  <label class="field-label" for="cart-name">Name</label>
+  <input id="cart-name" type="text" maxlength="40" [value]="name()" (input)="onName($event)" />
+
+  <span class="field-label">Days</span>
+  <div class="days">
+    @for (day of days; track day) {
+      <button type="button" [class.on]="chosenDays().includes(day)" (click)="toggleDay(day)">
+        {{ day }}
+      </button>
+    }
+  </div>
+
+  <div class="split">
+    <label class="field-label" for="start">From
+      <input id="start" type="time" [value]="start()" (input)="onStart($event)" />
+    </label>
+    <label class="field-label" for="end">To
+      <input id="end" type="time" [value]="end()" (input)="onEnd($event)" />
+    </label>
+  </div>
+
+  <label class="field-label" for="note">Note</label>
+  <input id="note" type="text" maxlength="80" [value]="note()" (input)="onNote($event)" />
+
+  <button class="solid" type="submit" [disabled]="busy()">Create cart</button>
+</form>
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+
+<div class="stack">
+  @for (cart of carts(); track cart.id) {
+    <a class="cart-card text" [routerLink]="['/home/desk', cart.id]">
+      <span>
+        <strong>{{ cart.name }}</strong>
+        <p>{{ describeSchedule(cart.schedule) }}</p>
+        @if (cart.token) {
+          <p class="token-line">{{ cart.token }}</p>
+        }
+      </span>
+      <span class="pill">{{ cart.loaded ? cart.veggies.length + ' vegetables' : 'Empty' }}</span>
+    </a>
+  }
+</div>

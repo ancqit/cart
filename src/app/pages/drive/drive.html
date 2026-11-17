@@ -1,0 +1,12 @@
+<h1>Arrival</h1>
+<p class="lede">The cart is going to this address.</p>
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+
+@if (slip(); as current) {
+  <app-slip [slip]="current" [showArrive]="true" [busy]="busy()" (arrived)="mark()" />
+} @else if (ready()) {
+  <p class="empty">That token is not a driver token.</p>
+}

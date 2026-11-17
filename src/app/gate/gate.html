@@ -1,0 +1,32 @@
+<section class="gate">
+  <div class="theme-float">
+    <app-theme-picker />
+  </div>
+  <form class="card" (submit)="$event.preventDefault(); enter()">
+    <p class="brand">Cart</p>
+    <h1>Enter</h1>
+    <p class="lede">The number you were given opens the portal.</p>
+
+    <label class="field-label" for="portal-number">Number</label>
+    <input
+      id="portal-number"
+      name="portal-number"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      autocapitalize="off"
+      maxlength="80"
+      [value]="code()"
+      (input)="onCode($event)"
+      [attr.aria-invalid]="rejected()"
+    />
+
+    <button class="solid wide" type="submit" [disabled]="code().trim().length === 0 || busy()">Enter</button>
+
+    @if (rejected()) {
+      <p class="error" role="alert">{{ message() }}</p>
+    }
+
+    <p class="copyright">© 2026 Sunskriti Data management company</p>
+  </form>
+</section>
