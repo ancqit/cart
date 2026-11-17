@@ -585,6 +585,42 @@ a.cart-card p {
   margin-top: 8px;
 }
 
+fieldset.stop-card {
+  border: 0;
+  margin: 18px 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+article.stop-card {
+  margin-top: 12px;
+  padding-bottom: 4px;
+}
+
+.choices {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.choices label {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  background: #fffdf8;
+}
+
+.choices label.on {
+  border-color: var(--ink);
+}
+
+.choices input {
+  width: auto;
+  margin: 0 0 4px;
+}
+
 .dock {
   position: fixed;
   z-index: 2;

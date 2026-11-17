@@ -15,7 +15,7 @@ Set these on the herback service. The portal does not store them.
 
 A cart token is what the loader types. That token is the cart. The entity can also open the portal with the entity number and see every loaded cart.
 
-Opening a cart shows the schedule and the vegetables. Each vegetable has a price and a fresh photograph. Adding vegetables and an address issues a token for the cart driver. The driver enters that token and gets the address.
+Creating a cart records a schedule for each address. The cart then has a form for vegetables and other things, each with a price and a fresh photograph. Opening that cart shows those addresses and those things. Adding them, for one of the addresses, issues a token for the cart driver. The driver enters that token and gets that address and its schedule.
 
 ## Photographs
 

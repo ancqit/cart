@@ -8,7 +8,7 @@ const slip: Slip = {
   cart_name: 'Park gate',
   schedule: { days: ['Mon'], start: '07:00', end: '09:00', note: '' },
   address: '12 Neem Lane near the park',
-  lines: [{ veggie_id: 'v1', name: 'Spinach', price: 40, unit: 'bunch', qty: 2 }],
+  lines: [{ item_id: 'v1', kind: 'veggie', name: 'Spinach', price: 40, unit: 'bunch', qty: 2 }],
   total: 80,
   status: 'open',
   created_at: '2026-11-17T00:00:00+00:00',
@@ -39,8 +39,8 @@ describe('cart api', () => {
     });
     const result = await new CartApi().placeOrder('entity-number', {
       cart_id: 'c1',
-      address: slip.address,
-      lines: [{ veggie_id: 'v1', qty: 2 }],
+      stop_id: 's1',
+      lines: [{ item_id: 'v1', qty: 2 }],
     });
     expect(auth).toBe('Bearer entity-number');
     expect(result.driver_token).toBe('K7M2P4QX');

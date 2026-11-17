@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CartApi } from '../../cart-api';
-import { coverUrl, describeSchedule } from '../../flow';
+import { coverUrl, describeStops, tally } from '../../flow';
 import { Cart } from '../../models';
 import { runBusy } from '../../run';
 import { Session } from '../../session';
@@ -20,7 +20,8 @@ export class CartsPage {
   readonly error = signal('');
   readonly busy = signal(false);
   readonly ready = signal(false);
-  readonly describeSchedule = describeSchedule;
+  readonly describeStops = describeStops;
+  readonly tally = tally;
   readonly coverUrl = coverUrl;
 
   constructor() {
@@ -28,7 +29,7 @@ export class CartsPage {
   }
 
   cover(cart: Cart): string {
-    return coverUrl(cart.veggies[0]?.photo.url);
+    return coverUrl(cart.items[0]?.photo.url);
   }
 
   private async load(): Promise<void> {

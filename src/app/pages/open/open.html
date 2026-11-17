@@ -10,33 +10,71 @@
   <p class="lede">Opening the cart.</p>
 } @else if (cart(); as current) {
   <h1>{{ current.name }}</h1>
-  <p class="lede">{{ describeSchedule(current.schedule) }}</p>
-  @if (current.schedule.note) {
-    <p>{{ current.schedule.note }}</p>
-  }
 
   @if (slip(); as currentSlip) {
     <app-slip [slip]="currentSlip" />
     <button class="quiet" type="button" (click)="again()">Another order</button>
   } @else {
+    <h2>Address</h2>
+    <div class="choices">
+      @for (stop of current.stops; track stop.id) {
+        <label [class.on]="stop.id === stopId()">
+          <input
+            type="radio"
+            name="stop"
+            [checked]="stop.id === stopId()"
+            (change)="chooseStop(stop.id)"
+          />
+          <strong>{{ stop.address }}</strong>
+          <span>{{ describeSchedule(stop.schedule) }}</span>
+          @if (stop.schedule.note) {
+            <span>{{ stop.schedule.note }}</span>
+          }
+        </label>
+      }
+    </div>
+
     <h2>Vegetables</h2>
-    @if (current.veggies.length === 0) {
-      <p class="empty">This cart is not loaded yet.</p>
+    @if (vegetables().length === 0) {
+      <p class="empty">No vegetable on this cart yet.</p>
     }
     <div class="veggies">
-      @for (veggie of current.veggies; track veggie.id) {
+      @for (item of vegetables(); track item.id) {
         <article class="veggie">
           <span class="photo">
-            @if (coverUrl(veggie.photo.url); as src) {
-              <img [src]="src" [alt]="veggie.name" />
+            @if (coverUrl(item.photo.url); as src) {
+              <img [src]="src" [alt]="item.name" />
             }
             <span class="fresh">Fresh</span>
           </span>
           <span>
-            <strong>{{ veggie.name }}</strong>
-            <p class="price">{{ money(veggie.price) }} / {{ veggie.unit }}</p>
-            <button class="solid" type="button" (click)="add(veggie.id)" [attr.data-veggie]="veggie.id">
-              {{ qtyOf(veggie.id) ? 'Add · ' + qtyOf(veggie.id) : 'Add' }}
+            <strong>{{ item.name }}</strong>
+            <p class="price">{{ money(item.price) }} / {{ item.unit }}</p>
+            <button class="solid" type="button" (click)="add(item.id)" [attr.data-item]="item.id">
+              {{ qtyOf(item.id) ? 'Add · ' + qtyOf(item.id) : 'Add' }}
+            </button>
+          </span>
+        </article>
+      }
+    </div>
+
+    <h2>Other things</h2>
+    @if (others().length === 0) {
+      <p class="empty">Nothing else on this cart yet.</p>
+    }
+    <div class="veggies">
+      @for (item of others(); track item.id) {
+        <article class="veggie">
+          <span class="photo">
+            @if (coverUrl(item.photo.url); as src) {
+              <img [src]="src" [alt]="item.name" />
+            }
+          </span>
+          <span>
+            <strong>{{ item.name }}</strong>
+            <p class="price">{{ money(item.price) }} / {{ item.unit }}</p>
+            <button class="solid" type="button" (click)="add(item.id)" [attr.data-item]="item.id">
+              {{ qtyOf(item.id) ? 'Add · ' + qtyOf(item.id) : 'Add' }}
             </button>
           </span>
         </article>
@@ -46,21 +84,21 @@
     <form class="basket" (submit)="place($event)">
       <h2>Basket</h2>
       @if (lines().length === 0) {
-        <p class="empty">Add a vegetable for the driver.</p>
+        <p class="empty">Add a vegetable or another thing for the driver.</p>
       }
       <ul class="list">
-        @for (line of lines(); track line.veggieId) {
+        @for (line of lines(); track line.itemId) {
           <li>
             <div>
               <strong>{{ line.name }}</strong>
               <p>{{ money(line.price) }} / {{ line.unit }}</p>
             </div>
             <span class="stepper">
-              <button type="button" (click)="bump(line.veggieId, -1)" [attr.aria-label]="'Fewer ' + line.name">
+              <button type="button" (click)="bump(line.itemId, -1)" [attr.aria-label]="'Fewer ' + line.name">
                 −
               </button>
               <span>{{ line.qty }}</span>
-              <button type="button" (click)="bump(line.veggieId, 1)" [attr.aria-label]="'More ' + line.name">
+              <button type="button" (click)="bump(line.itemId, 1)" [attr.aria-label]="'More ' + line.name">
                 +
               </button>
             </span>
@@ -71,20 +109,7 @@
         <p class="total">{{ money(basketTotal(lines())) }}</p>
       }
 
-      <label class="field-label" for="address">Address</label>
-      <textarea
-        id="address"
-        rows="3"
-        [value]="address()"
-        (input)="onAddress($event)"
-        placeholder="Where the cart should arrive"
-      ></textarea>
-
-      <button
-        class="solid wide"
-        type="submit"
-        [disabled]="busy() || lines().length === 0 || !addressOk(address())"
-      >
+      <button class="solid wide" type="submit" [disabled]="busy() || lines().length === 0 || !stopId()">
         Token for the driver
       </button>
     </form>

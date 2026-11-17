@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { API_URL } from './api-base';
-import { Cart, OrderLine, Role, Schedule, Slip, StoredPhoto } from './models';
+import { Cart, Kind, OrderLine, Role, Schedule, Slip, StoredPhoto } from './models';
 
 export class ApiError extends Error {
   constructor(
@@ -67,29 +67,33 @@ export class CartApi {
 
   createCart(
     token: string,
-    body: { token: string; name: string; schedule: Schedule },
+    body: { token: string; name: string; stops: { address: string; schedule: Schedule }[] },
   ): Promise<Cart> {
     return this.send<{ cart: Cart }>('/cart/carts', token, 'POST', body).then((payload) => payload.cart);
   }
 
-  saveSchedule(token: string, id: string, schedule: Schedule): Promise<Cart> {
-    return this.send<{ cart: Cart }>(`/cart/carts/${id}/schedule`, token, 'POST', schedule).then(
-      (body) => body.cart,
-    );
-  }
-
-  addVeggie(
+  addStop(
     token: string,
     id: string,
-    body: { name: string; price: number; unit: string; photo: StoredPhoto },
+    body: { address: string; schedule: Schedule },
   ): Promise<Cart> {
-    return this.send<{ cart: Cart }>(`/cart/carts/${id}/veggies`, token, 'POST', body).then(
-      (payload) => payload.cart,
-    );
+    return this.send<{ cart: Cart }>(`/cart/carts/${id}/stops`, token, 'POST', body).then((payload) => payload.cart);
   }
 
-  removeVeggie(token: string, cartId: string, veggieId: string): Promise<void> {
-    return this.send<void>(`/cart/carts/${cartId}/veggies/${veggieId}`, token, 'DELETE');
+  removeStop(token: string, cartId: string, stopId: string): Promise<void> {
+    return this.send<void>(`/cart/carts/${cartId}/stops/${stopId}`, token, 'DELETE');
+  }
+
+  addItem(
+    token: string,
+    id: string,
+    body: { kind: Kind; name: string; price: number; unit: string; photo: StoredPhoto },
+  ): Promise<Cart> {
+    return this.send<{ cart: Cart }>(`/cart/carts/${id}/items`, token, 'POST', body).then((payload) => payload.cart);
+  }
+
+  removeItem(token: string, cartId: string, itemId: string): Promise<void> {
+    return this.send<void>(`/cart/carts/${cartId}/items/${itemId}`, token, 'DELETE');
   }
 
   removeCart(token: string, id: string): Promise<void> {
@@ -98,7 +102,7 @@ export class CartApi {
 
   placeOrder(
     token: string,
-    body: { cart_id: string; address: string; lines: OrderLine[] },
+    body: { cart_id: string; stop_id: string; lines: OrderLine[] },
   ): Promise<Slip> {
     return this.send<{ slip: Slip }>('/cart/orders', token, 'POST', body).then((payload) => payload.slip);
   }

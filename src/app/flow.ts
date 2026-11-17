@@ -1,4 +1,4 @@
-import { Line, Schedule, Slip, Veggie } from './models';
+import { Item, Line, Schedule, Slip, Stop } from './models';
 
 export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 export type Day = (typeof DAYS)[number];
@@ -21,6 +21,33 @@ export function describeSchedule(schedule: Schedule): string {
   const days = DAYS.filter((day) => schedule.days.includes(day));
   const when = days.length ? days.join(', ') : 'No day';
   return `${when} · ${schedule.start}–${schedule.end}`;
+}
+
+export function describeStops(stops: Stop[]): string {
+  if (stops.length === 0) {
+    return 'No address';
+  }
+  if (stops.length === 1) {
+    return `${stops[0].address} · ${describeSchedule(stops[0].schedule)}`;
+  }
+  return `${stops.length} addresses`;
+}
+
+export function tally(items: { kind: string }[]): string {
+  const vegetables = items.filter((item) => item.kind === 'veggie').length;
+  const others = items.length - vegetables;
+  const parts: string[] = [];
+  if (vegetables === 1) {
+    parts.push('1 vegetable');
+  } else if (vegetables > 1) {
+    parts.push(`${vegetables} vegetables`);
+  }
+  if (others === 1) {
+    parts.push('1 other thing');
+  } else if (others > 1) {
+    parts.push(`${others} other things`);
+  }
+  return parts.join(' · ');
 }
 
 export function cartTokenOk(raw: string): boolean {
@@ -67,20 +94,20 @@ export function orderedDays(days: readonly string[]): string[] {
   return DAYS.filter((day) => days.includes(day));
 }
 
-export function addLine(lines: Line[], veggie: Pick<Veggie, 'id' | 'name' | 'price' | 'unit'>): Line[] {
-  const existing = lines.find((line) => line.veggieId === veggie.id);
+export function addLine(lines: Line[], item: Pick<Item, 'id' | 'kind' | 'name' | 'price' | 'unit'>): Line[] {
+  const existing = lines.find((line) => line.itemId === item.id);
   if (existing) {
-    return changeQty(lines, veggie.id, 1);
+    return changeQty(lines, item.id, 1);
   }
   return [
     ...lines,
-    { veggieId: veggie.id, name: veggie.name, price: veggie.price, unit: veggie.unit, qty: 1 },
+    { itemId: item.id, kind: item.kind, name: item.name, price: item.price, unit: item.unit, qty: 1 },
   ];
 }
 
-export function changeQty(lines: Line[], veggieId: string, delta: number): Line[] {
+export function changeQty(lines: Line[], itemId: string, delta: number): Line[] {
   return lines.flatMap((line) => {
-    if (line.veggieId !== veggieId) {
+    if (line.itemId !== itemId) {
       return [line];
     }
     const qty = line.qty + delta;
@@ -95,13 +122,13 @@ export function basketTotal(lines: Line[]): number {
   return Math.round(lines.reduce((sum, line) => sum + line.price * line.qty, 0) * 100) / 100;
 }
 
-export function isLoaded(cart: { veggies: unknown[] }): boolean {
-  return cart.veggies.length > 0;
+export function isLoaded(cart: { items: unknown[] }): boolean {
+  return cart.items.length > 0;
 }
 
-export function keepLines(lines: Line[], veggies: { id: string }[]): Line[] {
-  const ids = new Set(veggies.map((veggie) => veggie.id));
-  return lines.filter((line) => ids.has(line.veggieId));
+export function keepLines(lines: Line[], items: { id: string }[]): Line[] {
+  const ids = new Set(items.map((item) => item.id));
+  return lines.filter((line) => ids.has(line.itemId));
 }
 
 export function coverUrl(url: string | undefined): string {
