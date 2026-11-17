@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ApiError } from '../cart-api';
 import { Session } from '../session';
 import { ThemePicker } from '../theme-picker/theme-picker';
 
 @Component({
   selector: 'app-gate',
-  imports: [ThemePicker],
+  imports: [ThemePicker, RouterLink],
   templateUrl: './gate.html',
 })
 export class Gate {

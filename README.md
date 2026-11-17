@@ -27,6 +27,10 @@ The bucket CORS policy needs this site's origin on `PUT`, the same as herbant, s
 
 Meadow, blossom, linen, shore, apricot, lemon, sky, and clouds. Clock is kept for other products and is not in the list. A theme is the view and the wallpaper together.
 
+## Site QR
+
+`/qr` is open, with no number. Pick a line and download a PNG of this site's address. The mark is drawn in the browser.
+
 ## Deploy
 
 Connect this repo on Vercel. `vercel.json` publishes `dist/cart/browser` and sends `/api` to `https://herback.onrender.com`.

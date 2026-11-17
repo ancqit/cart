@@ -7,6 +7,7 @@ import { DeskPage } from './pages/desk/desk';
 import { DeskEditPage } from './pages/desk/edit';
 import { DrivePage } from './pages/drive/drive';
 import { OpenCart } from './pages/open/open';
+import { QrPage } from './pages/qr/qr';
 import { Shell } from './shell/shell';
 
 export const routes: Routes = [
@@ -24,5 +25,6 @@ export const routes: Routes = [
       { path: 'drive', component: DrivePage, canActivate: [driverGuard] },
     ],
   },
+  { path: 'qr', component: QrPage },
   { path: '**', redirectTo: '' },
 ];
