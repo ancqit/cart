@@ -33,7 +33,7 @@ Meadow, blossom, linen, shore, apricot, lemon, sky, and clouds. Clock is kept fo
 
 ## Deploy
 
-Connect this repo on Vercel. `vercel.json` publishes `dist/cart/browser` and sends `/api` to `https://herback.onrender.com`.
+Connect this repo on Vercel. `vercel.json` publishes `dist/cart/browser` and sends `/api` to `https://herback-1.onrender.com`.
 
 herback has to be deployed with the two numbers first, or those doors stay shut. A cart token still opens its cart once the loader has created it.
 
