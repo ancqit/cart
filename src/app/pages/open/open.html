@@ -34,6 +34,44 @@
       }
     </div>
 
+    <form id="stock-form" (submit)="addItem($event)">
+      <h2>Vegetable or other thing</h2>
+      <span class="field-label">Kind</span>
+      <div class="segment" role="group" aria-label="Kind">
+        <button type="button" [attr.aria-pressed]="kind() === 'veggie'" (click)="pickKind('veggie')">Vegetable</button>
+        <button type="button" [attr.aria-pressed]="kind() === 'other'" (click)="pickKind('other')">Other</button>
+      </div>
+
+      <label class="field-label" for="item-name">Name</label>
+      <input id="item-name" type="text" maxlength="40" [value]="itemName()" (input)="onItem($event)" />
+
+      <label class="field-label" for="item-price">Price</label>
+      <input
+        id="item-price"
+        class="token-input"
+        type="text"
+        inputmode="decimal"
+        [value]="price()"
+        (input)="onPrice($event)"
+      />
+
+      <span class="field-label">Unit</span>
+      <div class="segment" role="group" aria-label="Unit">
+        @for (unit of units; track unit) {
+          <button type="button" [attr.aria-pressed]="unit === chosenUnit()" (click)="pickUnit(unit)">
+            {{ unit }}
+          </button>
+        }
+      </div>
+
+      <label class="field-label" for="item-photo">Fresh photograph</label>
+      <input #photoInput id="item-photo" type="file" accept="image/jpeg,image/png,image/webp" (change)="onPhoto($event)" />
+
+      <button class="solid" type="submit" [disabled]="busy()">
+        {{ kind() === 'veggie' ? 'Add vegetable' : 'Add other thing' }}
+      </button>
+    </form>
+
     <h2>Vegetables</h2>
     @if (vegetables().length === 0) {
       <p class="empty">No vegetable on this cart yet.</p>
@@ -53,6 +91,7 @@
             <button class="solid" type="button" (click)="add(item.id)" [attr.data-item]="item.id">
               {{ qtyOf(item.id) ? 'Add · ' + qtyOf(item.id) : 'Add' }}
             </button>
+            <button class="quiet" type="button" (click)="removeItem(item.id)">Remove</button>
           </span>
         </article>
       }
@@ -76,6 +115,7 @@
             <button class="solid" type="button" (click)="add(item.id)" [attr.data-item]="item.id">
               {{ qtyOf(item.id) ? 'Add · ' + qtyOf(item.id) : 'Add' }}
             </button>
+            <button class="quiet" type="button" (click)="removeItem(item.id)">Remove</button>
           </span>
         </article>
       }
