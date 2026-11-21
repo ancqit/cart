@@ -21,7 +21,7 @@ Creating a cart records a schedule for each address. The cart then has a form fo
 
 Fresh photographs use the herback R2 bucket. The browser asks for a presigned PUT, then uploads straight to the bucket. Keys stay under `cart/photos/`. They do not land in `herb/`, `2001/`, `binter/`, or `shorts/`.
 
-The bucket CORS policy needs this site's origin on `PUT`, the same as herbant, scrap, and binter. Include `https://cart.vercel.app` and `http://localhost:4200`.
+The live site is `https://cart.junction.blog`. The bucket CORS policy needs that origin on `PUT`, the same as herbant, scrap, and binter. `http://localhost:4200` is the local desk. A `cart-….vercel.app` preview is not the production host.
 
 ## Themes
 
@@ -37,7 +37,7 @@ Connect this repo on Vercel. `vercel.json` publishes `dist/cart/browser` and sen
 
 herback has to be deployed with the two numbers first, or those doors stay shut. A cart token still opens its cart once the loader has created it.
 
-If the Vercel host is not `cart.vercel.app` or a `cart-….vercel.app` preview, add it to herback's `CORS_ORIGINS`.
+Production is `https://cart.junction.blog`. A `cart-….vercel.app` preview is not that host.
 
 ```bash
 npm install
