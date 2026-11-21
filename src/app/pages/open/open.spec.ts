@@ -110,4 +110,63 @@ describe('open cart', () => {
     expect(root.textContent).toContain('K7M2P4QX');
     expect(root.textContent).toContain('Token for the driver');
   });
+
+  it('adds a vegetable to the cart from the form', async () => {
+    const empty: Cart = { ...cart, items: [], loaded: false };
+    const stocked: Cart = { ...cart, items: [cart.items[0]], loaded: true };
+    const uploadPhoto = vi.fn(async () => ({
+      object_key: 'cart/photos/spinach.jpg',
+      content_type: 'image/jpeg',
+      filename: 'spinach.jpg',
+    }));
+    const addItem = vi.fn(async () => stocked);
+    await TestBed.configureTestingModule({
+      imports: [OpenCart],
+      providers: [
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: convertToParamMap({ id: 'c1' }) } },
+        },
+        {
+          provide: CartApi,
+          useValue: { cart: async () => empty, uploadPhoto, addItem },
+        },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(OpenCart);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('#stock-form')).not.toBeNull();
+    expect(root.textContent).toContain('No vegetable on this cart yet.');
+    expect(root.textContent).toContain('Add vegetable');
+
+    const page = fixture.componentInstance;
+    page.itemName.set('Spinach');
+    page.price.set('40');
+    page.pickUnit('bunch');
+    page.photo.set(new File(['spinach'], 'spinach.jpg', { type: 'image/jpeg' }));
+    await page.addItem(new Event('submit'));
+    fixture.detectChanges();
+
+    expect(uploadPhoto).toHaveBeenCalled();
+    expect(addItem).toHaveBeenCalledWith('entity-number', 'c1', {
+      kind: 'veggie',
+      name: 'Spinach',
+      price: 40,
+      unit: 'bunch',
+      photo: {
+        object_key: 'cart/photos/spinach.jpg',
+        content_type: 'image/jpeg',
+        filename: 'spinach.jpg',
+      },
+    });
+    expect(root.textContent).toContain('Spinach');
+    expect(root.textContent).not.toContain('No vegetable on this cart yet.');
+  });
 });
